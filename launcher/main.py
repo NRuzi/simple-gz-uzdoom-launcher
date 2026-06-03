@@ -3,15 +3,29 @@ from launcher import launch_profile
 
 
 def main():
-    profiles = list_profiles()
     
-    print("Simple Doom Launcher:\n")
+    print("\nSimple Doom Launcher:\n")
 
     while True:
-        for i, profile in enumerate(profiles, start=1):
+        profiles = list_profiles()
+
+        selected_profile = main_menu_choice(profiles)
+        
+        profile_json = load_profile(selected_profile)
+        launch_profile(profile_json)
+        break
+
+def print_main_menu(profiles):
+
+    for i, profile in enumerate(profiles, start=1):
             print(f"[{i}] {profile}")
 
-        print("[n] New Profile\n")
+    print("[n] New Profile\n")
+
+def main_menu_choice(profiles):
+
+    while True:
+        print_main_menu(profiles)
     
         choice = input("Select an option: ")
 
@@ -24,12 +38,9 @@ def main():
             if profiles:
                 try:
                     selected_profile = profiles[int(choice) - 1]
-                    break
+                    return selected_profile
 
                 except (ValueError, IndexError):
                     print("Invalid selection")
-    
-    profile_json = load_profile(selected_profile)
-    launch_profile(profile_json)
 
 main()

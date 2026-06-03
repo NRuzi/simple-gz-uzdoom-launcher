@@ -1,10 +1,23 @@
 import subprocess
 from pathlib import Path
-
-doom_path = Path("/mnt/i/Games/Games/GZDoom/UZDoom-4.14.3/uzdoom.exe")
+from paths import PROFILES_DIR, MODS_DIR, doom_path
 
 def launch_profile(profile):
+    save_path = PROFILES_DIR / profile["name"] / "saves"
+    save_path.mkdir(parents=True, exist_ok=True)
 
-    subprocess.run([str(doom_path),
-                    "-iwad",
-                    profile["iwad"]])
+    args = [
+            str(doom_path),
+            "-iwad",
+            profile["iwad"],
+            "-savedir",
+            str(save_path)
+            ]
+    
+    for mod in profile["mods"]:
+        args.extend([
+            "-file",
+            str(MODS_DIR / mod)
+        ])
+
+    subprocess.run(args)
