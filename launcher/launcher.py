@@ -9,7 +9,7 @@ def launch_profile(profile):
     args = [
             str(doom_path),
             "-iwad",
-            profile["iwad"],
+            str(MODS_DIR / profile["iwad"]),
             "-savedir",
             str(save_path)
             ]
