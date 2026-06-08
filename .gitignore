@@ -3,3 +3,5 @@ __pycache__/
 *.pyc
 profiles/
 mods/
+source_ports/
+settings.json
