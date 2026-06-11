@@ -3,7 +3,7 @@ from paths import MODS_DIR
 
 MODS_DIR.mkdir(exist_ok=True)
 
-VALID_EXTENSIONS = {".wad", ".pk3", ".deh"}
+MOD_EXTENSIONS = {".pk3", ".deh"}
 KNOWN_IWADS = {
     "DOOM.WAD",
     "DOOM2.WAD",
@@ -21,7 +21,7 @@ def list_mods():
         if not file.is_file():
             continue
         
-        if file.suffix.lower() in [".pk3", ".deh"]:
+        if file.suffix.lower() in MOD_EXTENSIONS:
             mods.append(file.name)
 
         elif (file.suffix.lower() == ".wad" 
@@ -30,13 +30,6 @@ def list_mods():
             mods.append(file.name)
     
     return mods
-    
-
-def print_mod_list(mod_list, selected):
-
-    for i, mod in enumerate(mod_list, start=1):
-            marker = "X" if mod in selected else " "
-            print(f"[{marker}] [{i}] {mod}")
 
 def get_wad_type(path):
     try:
@@ -61,7 +54,3 @@ def list_iwads():
     
     return iwads
 
-def print_iwad_list(iwad_list):
-     
-     for i, iwad in enumerate(iwad_list, start=1):
-          print(f"[{i}] {iwad}")

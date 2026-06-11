@@ -1,8 +1,10 @@
+import shutil
 from pathlib import Path
-from profiles import list_profiles, create_profile, load_profile, edit_profile, delete_profile
+from profiles import list_profiles, load_profile, build_profile, save_profile
 from launcher import launch_profile
-from settings import load_settings, save_settings, search_source_ports, set_source_port, source_port_is_configured
-from paths import SOURCE_PORT_DIR
+from settings import load_settings, search_source_ports, set_source_port, source_port_is_configured
+from mods import list_mods, list_iwads
+from paths import SOURCE_PORT_DIR, PROFILES_DIR
 
 
 def main():
@@ -39,7 +41,7 @@ def main_menu_choice():
         choice = input("Select an option: ")
 
         if choice.lower() == "n":
-            create_profile()
+            set_up_profile()
             continue
 
         elif choice.lower() == "e":
@@ -79,7 +81,7 @@ def edit_menu_choice(profiles):
     if profiles:
          try:
               selected_profile = profiles[int(edit_choice) - 1]
-              edit_profile(selected_profile)
+              edit_profile_menu(selected_profile)
          
          except (ValueError, IndexError):
               print("Invalid selection")
@@ -101,7 +103,7 @@ def delete_menu_choice(profiles):
     if profiles:
          try:
               selected_profile = profiles[int(delete_choice) - 1]
-              delete_profile(selected_profile)
+              delete_profile_menu(selected_profile)
          
          except (ValueError, IndexError):
               print("Invalid selection")
@@ -165,5 +167,118 @@ def manual_port_entry(settings):
          set_source_port(settings, port_path)
          print("Source path set!")
          return
+
+def set_iwad_menu(profile):
+    while True:
+        iwads = list_iwads()
+
+        if iwads:
+            print("Please select an iwad:\n")
+            print_iwad_list(iwads)
+            iwad_choice = input()
+
+            try:
+                selected_iwad = iwads[int(iwad_choice) - 1]
+                profile["iwad"] = selected_iwad
+                return
+            
+            except (ValueError, IndexError):
+                print("Invalid selection")
+        
+        else:
+            print("No iwads detected!")
+            return
+
+def set_mods_menu(profile):
+    mods = list_mods()
+    mod_selection = profile["mods"]
+
+    while True:
+        print("Please select your mods:\n")
+        print_mod_list(mods, mod_selection)
+        print("[n] Next")
+        mod_choice = input()
+
+        if mod_choice == "n" or mod_choice == "N":
+            profile["mods"] = mod_selection
+            return
+        
+        else:
+            if mods:
+                try:
+                    selected_mod = mods[int(mod_choice) - 1]
+                    
+                    if selected_mod in mod_selection:
+                        mod_selection.remove(selected_mod)
+                    else:
+                        mod_selection.append(selected_mod)
+
+                except (ValueError, IndexError):
+                    print("Invalid selection")
+
+def delete_profile_menu(profile):
+    profile_path = PROFILES_DIR / profile
+
+    if not profile_path.is_dir():
+        print("Profile not found")
+        return
+    
+    confirmation = input(f"Delete profile '{profile}' and its contents? (y/n): ")
+
+    if confirmation.lower() != "y":
+        print("Deletion cancelled")
+        return
+    
+    shutil.rmtree(profile_path)
+    print(f"Deleted profile: {profile}")
+
+def edit_profile_menu(profile_name):
+    profile = load_profile(profile_name)
+
+    while True:
+        print("What would you like to edit?\n")
+        print("[1] iwad choice")
+        print("[2] mod selection")
+
+        edit_choice = input()
+
+        match (edit_choice):
+            case "1":
+                set_iwad_menu(profile)
+                break
+            case "2":
+                set_mods_menu(profile)
+                break
+            case _:
+                print("Invalid selection\n")
+    
+    save_profile(profile)
+
+def set_up_profile():
+
+    name = input("Enter a name for your profile\n")
+
+    profile = build_profile(name)
+
+    set_iwad_menu(profile)
+
+    set_mods_menu(profile)
+
+    save_profile(profile)
+
+    print(f"Created profile: f{profile['name']}")
+
+    return
+
+def print_mod_list(mod_list, selected):
+
+    for i, mod in enumerate(mod_list, start=1):
+            marker = "X" if mod in selected else " "
+            print(f"[{marker}] [{i}] {mod}")
+
+def print_iwad_list(iwad_list):
+     
+     for i, iwad in enumerate(iwad_list, start=1):
+          print(f"[{i}] {iwad}")
 
 main()
