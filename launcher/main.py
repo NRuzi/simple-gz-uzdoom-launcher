@@ -191,7 +191,7 @@ def set_iwad_menu(profile):
 
 def set_mods_menu(profile):
     mods = list_mods()
-    mod_selection = profile["mods"]
+    mod_selection = profile["mods"].copy()
 
     while True:
         print("Please select your mods:\n")
@@ -199,7 +199,7 @@ def set_mods_menu(profile):
         print("[n] Next")
         mod_choice = input()
 
-        if mod_choice == "n" or mod_choice == "N":
+        if mod_choice.lower() == "n":
             profile["mods"] = mod_selection
             return
         

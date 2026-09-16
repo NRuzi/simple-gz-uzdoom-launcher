@@ -26,7 +26,10 @@ def save_settings(settings):
 def source_port_is_configured():
     settings = load_settings()
 
-    return settings["source_port"] != ""
+    if settings["source_port"] == "":
+        return False
+
+    return Path(settings["source_port"]).is_file()
 
 def search_source_ports():
     source_ports = []
