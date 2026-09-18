@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import shutil
+from pathlib import Path
 
 from profiles import list_profiles, load_profile, save_profile, profile_exists
 from launcher import launch_profile
@@ -42,7 +43,7 @@ def rescan_source_ports():
 def source_port_is_valid():
     source_ports = search_source_ports()
     settings = load_settings()
-    configured_port = settings["source_port"]
+    configured_port = Path(settings["source_port"])
 
     return configured_port in source_ports
 
@@ -56,16 +57,25 @@ def launch_selected_profile():
 def open_profile_manager():
     window = tk.Toplevel(root)
     window.title("Profile Manager")
-    window.geometry("400x300")
+    window.geometry("300x250")
+
+    profile_manager_frame = ttk.Frame(window)
+    profile_manager_frame.pack(pady=10)
+
+    profile_label = ttk.Label(
+        profile_manager_frame,
+        text="Profiles"
+    )
+    profile_label.grid(row=0, column=0)
 
     profiles = list_profiles()
 
-    profile_list = tk.Listbox(window)
+    profile_list = tk.Listbox(profile_manager_frame)
 
     for profile in profiles:
         profile_list.insert(tk.END, profile)
 
-    profile_list.pack()
+    profile_list.grid(row=1, column=0, rowspan=3, padx=15)
 
     def refresh_profile_list():
         profiles.clear()
@@ -79,11 +89,11 @@ def open_profile_manager():
         refresh_main_profile_dropdown()
 
     create_button = tk.Button(
-        window,
-        text="Create",
+        profile_manager_frame,
+        text="Create New",
         command=lambda: open_profile_editor(None, refresh_profile_list)
     )
-    create_button.pack()
+    create_button.grid(row=1, column=1)
 
     def edit_selected_profile():
         selection = profile_list.curselection()
@@ -99,11 +109,11 @@ def open_profile_manager():
         open_profile_editor(profile, refresh_profile_list)
 
     edit_button = tk.Button(
-        window,
+        profile_manager_frame,
         text="Edit",
         command=edit_selected_profile
     )
-    edit_button.pack()
+    edit_button.grid(row=2, column=1)
 
     def delete_profile():
         selection = profile_list.curselection()
@@ -135,23 +145,42 @@ def open_profile_manager():
         refresh_main_profile_dropdown()
 
     delete_button = tk.Button(
-        window,
+        profile_manager_frame,
         text="Delete",
         command=delete_profile
     )
-    delete_button.pack()
+    delete_button.grid(row=3, column=1)
+
+    close_button = tk.Button(
+        window,
+        text="Close",
+        command=window.destroy
+    )
+    close_button.pack()
 
 def open_profile_editor(profile, on_save=None):
     new_profile = profile is None
 
     window = tk.Toplevel(root)
     window.title("Create Profile" if new_profile else "Edit Profile")
-    window.geometry("400x300")
+    window.geometry("500x400")
+
+    profile_editor_frame = ttk.Frame(window)
+    profile_editor_frame.pack(pady=10)
+
+    save_cancel_frame = ttk.Frame(window)
+    save_cancel_frame.pack(pady=10)
 
     #New profile logic
     if new_profile:
-        name_entry = ttk.Entry(window)
-        name_entry.pack()
+        name_entry_label = ttk.Label(
+            profile_editor_frame,
+            text="Name:"
+        )
+        name_entry_label.grid(row=0, column=0)
+
+        name_entry = ttk.Entry(profile_editor_frame)
+        name_entry.grid(row=0, column=1)
 
         profile = {
         "name": "",
@@ -162,6 +191,12 @@ def open_profile_editor(profile, on_save=None):
 
 
     #iwad selection logic
+    iwad_label = ttk.Label(
+        profile_editor_frame,
+        text="IWAD:"
+    )
+    iwad_label.grid(row=1, column=0)
+
     iwads = list_iwads()
     iwad_var = tk.StringVar()
 
@@ -169,12 +204,12 @@ def open_profile_editor(profile, on_save=None):
         iwad_var.set(profile["iwad"])
 
     iwad_menu = ttk.Combobox(
-        window,
+        profile_editor_frame,
         textvariable=iwad_var,
         values=iwads,
         state="readonly"
     )
-    iwad_menu.pack()
+    iwad_menu.grid(row=1, column=1, pady=15)
 
     def get_selected_iwad():
         index = iwad_menu.current()
@@ -185,21 +220,39 @@ def open_profile_editor(profile, on_save=None):
         return iwad_var.get()
 
     #avilable/selected mod list logic
+    available_label = ttk.Label(
+        profile_editor_frame,
+        text="Available Mods"
+    )
+    available_label.grid(row=2, column=0)
+
+    buttons_label = ttk.Label(
+        profile_editor_frame,
+        text="Controls"
+    )
+    buttons_label.grid(row=2, column=1)
+
+    selected_label = ttk.Label(
+        profile_editor_frame,
+        text="Selected Mods"
+    )
+    selected_label.grid(row=2, column=2)
+
     mods = list_mods()
     selected_mods = profile["mods"].copy()
     available_mods = [mod for mod in mods if mod not in selected_mods]
 
     available_list = tk.Listbox(
-        window,
+        profile_editor_frame,
         selectmode=tk.SINGLE
     )
-    available_list.pack()
+    available_list.grid(row=3, column=0, rowspan=4)
 
     selected_list = tk.Listbox(
-        window,
+        profile_editor_frame,
         selectmode=tk.SINGLE,
     )
-    selected_list.pack()
+    selected_list.grid(row=3, column=2, rowspan=4, columnspan=3)
 
     for mod in available_mods:
         available_list.insert(tk.END, mod)
@@ -223,12 +276,12 @@ def open_profile_editor(profile, on_save=None):
         selected_list.insert(tk.END, mod)
 
     select_button = tk.Button(
-        window,
+        profile_editor_frame,
         text="->",
         state="normal",
         command=select_mod
     )
-    select_button.pack()
+    select_button.grid(row=4, column=1)
 
     def deselect_mod():
         selection = selected_list.curselection()
@@ -245,12 +298,12 @@ def open_profile_editor(profile, on_save=None):
         available_list.insert(0, mod)
 
     deselect_button = tk.Button(
-        window,
+        profile_editor_frame,
         text="<-",
         state="normal",
         command=deselect_mod
     )
-    deselect_button.pack()
+    deselect_button.grid(row=5, column=1)
 
     def move_mod_up():
         selection = selected_list.curselection()
@@ -273,12 +326,12 @@ def open_profile_editor(profile, on_save=None):
         selected_list.selection_set(index - 1)
 
     up_button = tk.Button(
-        window,
+        profile_editor_frame,
         text="↑",
         state="normal",
         command=move_mod_up
     )
-    up_button.pack()
+    up_button.grid(row=7, column=2)
 
     def move_mod_down():
         selection = selected_list.curselection()
@@ -301,12 +354,12 @@ def open_profile_editor(profile, on_save=None):
         selected_list.selection_set(index + 1)
 
     down_button = tk.Button(
-        window,
+        profile_editor_frame,
         text="↓",
         state="normal",
         command=move_mod_down
     )
-    down_button.pack()
+    down_button.grid(row=7, column=3)
 
     def save_button_click():
         if new_profile:
@@ -339,19 +392,19 @@ def open_profile_editor(profile, on_save=None):
         window.destroy()
 
     save_button = tk.Button(
-        window,
+        save_cancel_frame,
         text="Save",
         state="normal",
         command=save_button_click
     )
-    save_button.pack()
+    save_button.grid(row=0, column=1, padx=10)
 
     cancel_button = tk.Button(
-        window,
+        save_cancel_frame,
         text="Cancel",
         command=window.destroy
     )
-    cancel_button.pack()
+    cancel_button.grid(row=0, column=0, padx=10)
 
 def refresh_main_profile_dropdown():
     profiles.clear()
@@ -363,30 +416,45 @@ def refresh_main_profile_dropdown():
 
     update_launch_button()
 
+#Build main menu window
 root = tk.Tk()
 root.title("Doom Launcher")
-root.geometry("500x400")
+root.geometry("450x300")
+
+source_frame = ttk.Frame(root)
+source_frame.pack(pady=10)
+
+profile_frame = ttk.Frame(root)
+profile_frame.pack(pady=10)
+
+button_frame = ttk.Frame(root)
+button_frame.pack(pady=10)
+
+#Source port logic
+source_port_label = ttk.Label(
+    source_frame,
+    text="Source Port"
+)
+source_port_label.grid(row=0, column=0)
 
 source_ports = search_source_ports()
 source_port_var = tk.StringVar()
 
 source_port_dropdown = ttk.Combobox(
-    root,
+    source_frame,
     textvariable=source_port_var,
     values=[str(port.relative_to(SOURCE_PORT_DIR)) for port in source_ports],
     state="readonly"
 )
-
-source_port_dropdown.pack()
+source_port_dropdown.grid(row=1, column=0)
 
 source_port_refresh = tk.Button(
-    root,
+    button_frame,
     text="Refresh Source Ports",
     state="normal",
     command=rescan_source_ports
 )
-
-source_port_refresh.pack()
+source_port_refresh.grid(row=0, column=0)
 
 settings = load_settings()
 configured_port = settings["source_port"]
@@ -401,35 +469,40 @@ for index, port in enumerate(source_ports):
         source_port_dropdown.current(index)
         break
 
+#Profile logic
+profile_label = ttk.Label(
+    profile_frame,
+    text="Profile"
+)
+profile_label.grid(row=0, column=0)
+
 profiles = list_profiles()
 
 profile_selection = tk.StringVar()
 
 profile_dropdown = ttk.Combobox(
-    root,
+    profile_frame,
     textvariable=profile_selection,
     values=profiles,
     state="readonly"
 )
-
-profile_dropdown.pack()
+profile_dropdown.grid(row=1, column=0)
 
 profile_button = tk.Button(
-    root,
+    button_frame,
     text="Manage Profiles",
     command=open_profile_manager
 )
+profile_button.grid(row=0, column=2)
 
-profile_button.pack()
-
+#Launch logic
 launch_button = tk.Button(
-    root,
+    button_frame,
     text="Launch Doom",
     state="disabled",
     command=launch_selected_profile
 )
-
-launch_button.pack()
+launch_button.grid(row=1, column=0, columnspan=3, pady=15)
 
 profile_dropdown.bind(
     "<<ComboboxSelected>>",
