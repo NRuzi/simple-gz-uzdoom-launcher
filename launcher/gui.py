@@ -22,6 +22,7 @@ def profile_selected(event):
     update_launch_button()
 
 def source_port_selected(event):
+    source_ports = search_source_ports()
     index = source_port_dropdown.current()
     selected_port = source_ports[index]
 
@@ -447,6 +448,11 @@ source_port_dropdown = ttk.Combobox(
     state="readonly"
 )
 source_port_dropdown.grid(row=1, column=0)
+
+source_port_dropdown.bind(
+    "<<ComboboxSelected>>",
+    source_port_selected
+)
 
 source_port_refresh = tk.Button(
     button_frame,
