@@ -1,1 +1,1 @@
-.\.venv\Scripts\python.exe .\launcher\gui.py
+python .\launcher\gui.py
