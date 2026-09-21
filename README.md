@@ -59,9 +59,9 @@ If the launcher is running, press the refresh button to load it into the dropdow
 
 ### 2. Add your WADs
 
-Place both your IWADs and PWADs in the wads directory.
+Place both your IWADs, PWADs, and PK3s in the wads directory.
 
-The launcher should differentiate the two automatically, but hardcoded IWADs currently include:
+The launcher should differentiate WADs automatically, but hardcoded IWADs currently include:
 
 * DOOM
 * DOOM II
