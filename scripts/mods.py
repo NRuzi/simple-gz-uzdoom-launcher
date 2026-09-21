@@ -11,7 +11,9 @@ KNOWN_IWADS = {
     "TNT.WAD",
     "HERETIC.WAD",
     "HEXEN.WAD",
-    "CHEX.WAD"
+    "CHEX.WAD",
+    "FREEDOOM1.WAD",
+    "FREEDOOM2.WAD"
 }
 
 def list_mods():
