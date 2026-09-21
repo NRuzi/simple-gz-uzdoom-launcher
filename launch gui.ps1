@@ -1,1 +1,0 @@
-python .\launcher\gui.py
