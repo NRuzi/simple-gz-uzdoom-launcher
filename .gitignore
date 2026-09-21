@@ -2,6 +2,6 @@
 __pycache__/
 *.pyc
 user_profiles/
-mods/
+wads/
 source_ports/
 settings.json
